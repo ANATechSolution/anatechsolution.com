@@ -6,10 +6,8 @@ a{text-decoration:none;color:inherit}
 .header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.97);border-bottom:1px solid #e7edf5}
 .nav{min-height:82px;display:flex;align-items:center;justify-content:space-between;gap:25px}
 .brand{display:flex;align-items:center;gap:12px}
-.brand img{width:66px;height:66px;object-fit:cover;border-radius:50%}
-.brand-name{display:block;font-size:25px;font-weight:800;letter-spacing:-.8px;color:#0e2d64}
-.brand-name span{color:#f05a24}
-.brand small{display:block;color:#64748b;font-size:11px;margin-top:1px}
+.brand img{width:220px;height:auto;object-fit:contain;border-radius:0}
+.brand-name,.brand small{display:none}
 .nav-links{display:flex;align-items:center;gap:28px;font-size:14px;font-weight:700}
 .nav-links a{padding:8px 0}
 .nav-links a:hover,.nav-links .active{color:#075be7}
