@@ -1,21 +1,41 @@
 /* =========================================================
-   ANATECHSOLUTION WEBSITE JAVASCRIPT
+   ANATECHSOLUTION - WEBSITE INTERACTIONS
    ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
-
-    /* =========================
-       MOBILE NAVIGATION
-    ========================== */
-
     const menuToggle = document.querySelector(".menu-toggle");
     const navLinks = document.querySelector(".nav-links");
+    const header = document.querySelector(".header");
+
+    /* -------------------------
+       MOBILE NAVIGATION
+       ------------------------- */
+
+    const closeMenu = () => {
+        if (!menuToggle || !navLinks) return;
+
+        navLinks.classList.remove("open");
+
+        menuToggle.setAttribute(
+            "aria-expanded",
+            "false"
+        );
+
+        menuToggle.setAttribute(
+            "aria-label",
+            "Open navigation"
+        );
+
+        menuToggle.textContent = "☰";
+    };
 
     if (menuToggle && navLinks) {
 
-        menuToggle.addEventListener("click", () => {
+        menuToggle.addEventListener("click", (event) => {
+            event.stopPropagation();
 
-            const isOpen = navLinks.classList.toggle("open");
+            const isOpen =
+                navLinks.classList.toggle("open");
 
             menuToggle.setAttribute(
                 "aria-expanded",
@@ -29,219 +49,299 @@ document.addEventListener("DOMContentLoaded", () => {
                     : "Open navigation"
             );
 
-            menuToggle.textContent = isOpen ? "✕" : "☰";
+            menuToggle.textContent =
+                isOpen ? "✕" : "☰";
         });
 
+        /* Close menu after clicking a navigation link */
 
-        /* Close menu after selecting a navigation item */
+        navLinks.querySelectorAll("a").forEach((link) => {
 
-        document
-            .querySelectorAll(".nav-links a")
-            .forEach(link => {
-
-                link.addEventListener("click", () => {
-
-                    navLinks.classList.remove("open");
-
-                    menuToggle.setAttribute(
-                        "aria-expanded",
-                        "false"
-                    );
-
-                    menuToggle.setAttribute(
-                        "aria-label",
-                        "Open navigation"
-                    );
-
-                    menuToggle.textContent = "☰";
-                });
-
+            link.addEventListener("click", () => {
+                closeMenu();
             });
 
+        });
 
         /* Close menu when clicking outside */
 
-        document.addEventListener("click", event => {
-
-            const clickedInsideMenu =
-                navLinks.contains(event.target);
-
-            const clickedToggle =
-                menuToggle.contains(event.target);
+        document.addEventListener("click", (event) => {
 
             if (
-                !clickedInsideMenu &&
-                !clickedToggle &&
-                navLinks.classList.contains("open")
+                navLinks.classList.contains("open") &&
+                !navLinks.contains(event.target) &&
+                !menuToggle.contains(event.target)
             ) {
-
-                navLinks.classList.remove("open");
-
-                menuToggle.setAttribute(
-                    "aria-expanded",
-                    "false"
-                );
-
-                menuToggle.setAttribute(
-                    "aria-label",
-                    "Open navigation"
-                );
-
-                menuToggle.textContent = "☰";
+                closeMenu();
             }
 
         });
 
+        /* Close mobile menu when returning to desktop */
+
+        window.addEventListener("resize", () => {
+
+            if (window.innerWidth > 760) {
+                closeMenu();
+            }
+
+        });
     }
 
 
-    /* =========================
+    /* -------------------------
        COPYRIGHT YEAR
-    ========================== */
+       ------------------------- */
 
     const yearElement =
         document.getElementById("year");
 
     if (yearElement) {
+
         yearElement.textContent =
             new Date().getFullYear();
+
     }
 
 
-    /* =========================
+    /* -------------------------
+       HEADER SHADOW ON SCROLL
+       ------------------------- */
+
+    const updateHeader = () => {
+
+        if (!header) return;
+
+        header.style.boxShadow =
+            window.scrollY > 12
+                ? "0 8px 28px rgba(16,29,58,.08)"
+                : "none";
+
+    };
+
+    updateHeader();
+
+    window.addEventListener(
+        "scroll",
+        updateHeader,
+        { passive: true }
+    );
+
+
+    /* -------------------------
        ACTIVE NAVIGATION
-    ========================== */
+       ------------------------- */
 
-    const sections =
-        document.querySelectorAll("main section[id]");
+    const sections = Array.from(
+        document.querySelectorAll(
+            "main section[id]"
+        )
+    );
 
-    const navigationLinks =
-        document.querySelectorAll(".nav-links a[href^='#']");
-
+    const navigationLinks = Array.from(
+        document.querySelectorAll(
+            ".nav-links a[href^='#']"
+        )
+    );
 
     const updateActiveNavigation = () => {
 
-        let currentSection = "";
+        if (
+            !sections.length ||
+            !navigationLinks.length
+        ) {
+            return;
+        }
 
-        sections.forEach(section => {
+        const scrollPosition =
+            window.scrollY + 150;
 
-            const sectionTop =
-                section.offsetTop - 130;
+        let currentSection =
+            sections[0].id;
 
-            if (window.scrollY >= sectionTop) {
-                currentSection = section.id;
+        sections.forEach((section) => {
+
+            if (
+                scrollPosition >=
+                section.offsetTop
+            ) {
+                currentSection =
+                    section.id;
             }
 
         });
 
-        navigationLinks.forEach(link => {
-
-            link.classList.remove("active");
+        navigationLinks.forEach((link) => {
 
             const target =
                 link.getAttribute("href");
 
-            if (target === `#${currentSection}`) {
-                link.classList.add("active");
-            }
+            link.classList.toggle(
+                "active",
+                target ===
+                    `#${currentSection}`
+            );
 
         });
 
     };
 
+    updateActiveNavigation();
 
     window.addEventListener(
         "scroll",
         updateActiveNavigation,
-        { passive:true }
+        { passive: true }
     );
 
-    updateActiveNavigation();
 
-
-    /* =========================
-       HEADER SHADOW ON SCROLL
-    ========================== */
-
-    const header =
-        document.querySelector(".header");
-
-    const updateHeader =
-        () => {
-
-            if (!header) return;
-
-            if (window.scrollY > 20) {
-
-                header.style.boxShadow =
-                    "0 6px 25px rgba(16,29,58,.07)";
-
-            } else {
-
-                header.style.boxShadow =
-                    "none";
-
-            }
-
-        };
-
-
-    window.addEventListener(
-        "scroll",
-        updateHeader,
-        { passive:true }
-    );
-
-    updateHeader();
-
-
-    /* =========================
+    /* -------------------------
        SMOOTH INTERNAL NAVIGATION
-    ========================== */
+       ------------------------- */
 
     document
         .querySelectorAll('a[href^="#"]')
-        .forEach(link => {
+        .forEach((link) => {
 
-            link.addEventListener("click", event => {
+            link.addEventListener(
+                "click",
+                (event) => {
 
-                const targetId =
-                    link.getAttribute("href");
+                    const targetId =
+                        link.getAttribute(
+                            "href"
+                        );
 
-                if (
-                    !targetId ||
-                    targetId === "#"
-                ) {
-                    return;
+                    if (
+                        !targetId ||
+                        targetId === "#"
+                    ) {
+                        return;
+                    }
+
+                    const target =
+                        document.querySelector(
+                            targetId
+                        );
+
+                    if (!target) {
+                        return;
+                    }
+
+                    event.preventDefault();
+
+                    const headerHeight =
+                        header
+                            ? header.offsetHeight
+                            : 0;
+
+                    const targetTop =
+                        target
+                            .getBoundingClientRect()
+                            .top +
+                        window.scrollY -
+                        headerHeight -
+                        10;
+
+                    window.scrollTo({
+                        top: targetTop,
+                        behavior: "smooth"
+                    });
+
+                    history.replaceState(
+                        null,
+                        "",
+                        targetId
+                    );
+
+                    closeMenu();
+
                 }
-
-                const target =
-                    document.querySelector(targetId);
-
-                if (!target) {
-                    return;
-                }
-
-                event.preventDefault();
-
-                const headerHeight =
-                    header
-                        ? header.offsetHeight
-                        : 0;
-
-                const targetPosition =
-                    target.getBoundingClientRect().top +
-                    window.scrollY -
-                    headerHeight -
-                    15;
-
-                window.scrollTo({
-                    top:targetPosition,
-                    behavior:"smooth"
-                });
-
-            });
+            );
 
         });
+
+
+    /* -------------------------
+       SCROLL REVEAL ANIMATION
+       ------------------------- */
+
+    const revealTargets = [
+
+        ".section-heading",
+
+        ".about-card",
+
+        ".service-card",
+
+        ".process-item",
+
+        ".why-card",
+
+        ".contact-item"
+
+    ];
+
+    const revealElements =
+        document.querySelectorAll(
+            revealTargets.join(",")
+        );
+
+
+    if (
+        "IntersectionObserver" in window &&
+        revealElements.length
+    ) {
+
+        const observer =
+            new IntersectionObserver(
+                (entries, obs) => {
+
+                    entries.forEach(
+                        (entry) => {
+
+                            if (
+                                !entry.isIntersecting
+                            ) {
+                                return;
+                            }
+
+                            entry.target.classList.add(
+                                "reveal",
+                                "visible"
+                            );
+
+                            obs.unobserve(
+                                entry.target
+                            );
+
+                        }
+                    );
+
+                },
+                {
+                    threshold: 0.12,
+
+                    rootMargin:
+                        "0px 0px -45px 0px"
+                }
+            );
+
+
+        revealElements.forEach(
+            (element) => {
+
+                element.classList.add(
+                    "reveal"
+                );
+
+                observer.observe(
+                    element
+                );
+
+            }
+        );
+
+    }
 
 });
