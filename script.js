@@ -1,221 +1,87 @@
-/* =========================================================
-   ANATECHSOLUTION - WEBSITE INTERACTIONS
-   ========================================================= */
-
 document.addEventListener("DOMContentLoaded", () => {
-    const menuToggle = document.querySelector(".menu-toggle");
-    const navLinks = document.querySelector(".nav-links");
-    const header = document.querySelector(".header");
+  const menuButton = document.querySelector(".menu-toggle");
+  const nav = document.querySelector(".main-nav");
 
-    /* -------------------------
-       MOBILE NAVIGATION
-       ------------------------- */
-
-    const closeMenu = () => {
-        if (!menuToggle || !navLinks) return;
-
-        navLinks.classList.remove("open");
-        menuToggle.setAttribute("aria-expanded", "false");
-        menuToggle.setAttribute("aria-label", "Open navigation");
-        menuToggle.textContent = "☰";
-    };
-
-    if (menuToggle && navLinks) {
-        menuToggle.addEventListener("click", (event) => {
-            event.stopPropagation();
-
-            const isOpen = navLinks.classList.toggle("open");
-
-            menuToggle.setAttribute(
-                "aria-expanded",
-                isOpen ? "true" : "false"
-            );
-
-            menuToggle.setAttribute(
-                "aria-label",
-                isOpen ? "Close navigation" : "Open navigation"
-            );
-
-            menuToggle.textContent = isOpen ? "✕" : "☰";
-        });
-
-        navLinks.querySelectorAll("a").forEach((link) => {
-            link.addEventListener("click", () => {
-                closeMenu();
-            });
-        });
-
-        document.addEventListener("click", (event) => {
-            if (
-                navLinks.classList.contains("open") &&
-                !navLinks.contains(event.target) &&
-                !menuToggle.contains(event.target)
-            ) {
-                closeMenu();
-            }
-        });
-
-        window.addEventListener("resize", () => {
-            if (window.innerWidth > 760) {
-                closeMenu();
-            }
-        });
-    }
-
-    /* -------------------------
-       COPYRIGHT YEAR
-       ------------------------- */
-
-    const yearElement = document.getElementById("year");
-
-    if (yearElement) {
-        yearElement.textContent = new Date().getFullYear();
-    }
-
-    /* -------------------------
-       HEADER SHADOW ON SCROLL
-       ------------------------- */
-
-    const updateHeader = () => {
-        if (!header) return;
-
-        header.style.boxShadow =
-            window.scrollY > 12
-                ? "0 8px 28px rgba(16,29,58,.08)"
-                : "none";
-    };
-
-    updateHeader();
-
-    window.addEventListener(
-        "scroll",
-        updateHeader,
-        { passive: true }
-    );
-
-    /* -------------------------
-       ACTIVE NAVIGATION
-       ------------------------- */
-
-    const sections = Array.from(
-        document.querySelectorAll("main section[id]")
-    );
-
-    const navigationLinks = Array.from(
-        document.querySelectorAll(".nav-links a[href^='#']")
-    );
-
-    const updateActiveNavigation = () => {
-        if (!sections.length || !navigationLinks.length) return;
-
-        const scrollPosition = window.scrollY + 150;
-        let currentSection = sections[0].id;
-
-        sections.forEach((section) => {
-            if (scrollPosition >= section.offsetTop) {
-                currentSection = section.id;
-            }
-        });
-
-        navigationLinks.forEach((link) => {
-            const target = link.getAttribute("href");
-
-            link.classList.toggle(
-                "active",
-                target === `#${currentSection}`
-            );
-        });
-    };
-
-    updateActiveNavigation();
-
-    window.addEventListener(
-        "scroll",
-        updateActiveNavigation,
-        { passive: true }
-    );
-
-    /* -------------------------
-       SMOOTH INTERNAL NAVIGATION
-       ------------------------- */
-
-    document.querySelectorAll('a[href^="#"]').forEach((link) => {
-        link.addEventListener("click", (event) => {
-            const targetId = link.getAttribute("href");
-
-            if (!targetId || targetId === "#") return;
-
-            const target = document.querySelector(targetId);
-
-            if (!target) return;
-
-            event.preventDefault();
-
-            const headerHeight = header
-                ? header.offsetHeight
-                : 0;
-
-            const targetTop =
-                target.getBoundingClientRect().top +
-                window.scrollY -
-                headerHeight -
-                10;
-
-            window.scrollTo({
-                top: targetTop,
-                behavior: "smooth"
-            });
-
-            history.replaceState(
-                null,
-                "",
-                targetId
-            );
-
-            closeMenu();
-        });
+  // Mobile navigation
+  if (menuButton && nav) {
+    menuButton.addEventListener("click", () => {
+      const open = nav.classList.toggle("open");
+      menuButton.setAttribute("aria-expanded", String(open));
     });
 
-    /* -------------------------
-       SCROLL REVEAL ANIMATION
-       ------------------------- */
+    nav.querySelectorAll("a").forEach(link => {
+      link.addEventListener("click", () => {
+        nav.classList.remove("open");
+        menuButton.setAttribute("aria-expanded", "false");
+      });
+    });
+  }
 
-    const revealTargets = [
-        ".section-heading",
-        ".about-card",
-        ".service-card",
-        ".process-item",
-        ".why-card",
-        ".contact-item"
-    ];
+  // Active navigation link while scrolling
+  const sections = [...document.querySelectorAll("main section[id]")];
+  const links = [...document.querySelectorAll(".main-nav a[href^='#']")];
 
-    const revealElements = document.querySelectorAll(
-        revealTargets.join(",")
-    );
+  const updateActiveLink = () => {
+    const y = window.scrollY + 140;
+    let current = sections[0]?.id || "home";
 
-    if ("IntersectionObserver" in window && revealElements.length) {
-        const observer = new IntersectionObserver(
-            (entries, obs) => {
-                entries.forEach((entry) => {
-                    if (!entry.isIntersecting) return;
+    sections.forEach(section => {
+      if (y >= section.offsetTop) {
+        current = section.id;
+      }
+    });
 
-                    entry.target.classList.add(
-                        "reveal",
-                        "visible"
-                    );
+    links.forEach(link => {
+      link.classList.toggle(
+        "active",
+        link.getAttribute("href") === `#${current}`
+      );
+    });
+  };
 
-                    obs.unobserve(entry.target);
-                });
-            },
-            {
-                threshold: 0.12,
-                rootMargin: "0px 0px -45px 0px"
-            }
-        );
+  window.addEventListener("scroll", updateActiveLink, {
+    passive: true
+  });
 
-        revealElements.forEach((element) => {
-            element.classList.add("reveal");
-            observer.observe(element);
-        });
+  updateActiveLink();
+
+  // Smooth entrance animation for cards
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    {
+      threshold: 0.12
     }
+  );
+
+  document
+    .querySelectorAll(
+      ".service-card, .approach-grid article, .why-grid article, .principles article"
+    )
+    .forEach(el => {
+      el.style.opacity = "0";
+      el.style.transform = "translateY(18px)";
+      el.style.transition =
+        "opacity .55s ease, transform .55s ease";
+
+      observer.observe(el);
+    });
+
+  // Animation visibility class
+  const style = document.createElement("style");
+
+  style.textContent = `
+    .is-visible {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  `;
+
+  document.head.appendChild(style);
 });
