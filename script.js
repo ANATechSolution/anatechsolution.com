@@ -15,27 +15,16 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!menuToggle || !navLinks) return;
 
         navLinks.classList.remove("open");
-
-        menuToggle.setAttribute(
-            "aria-expanded",
-            "false"
-        );
-
-        menuToggle.setAttribute(
-            "aria-label",
-            "Open navigation"
-        );
-
+        menuToggle.setAttribute("aria-expanded", "false");
+        menuToggle.setAttribute("aria-label", "Open navigation");
         menuToggle.textContent = "☰";
     };
 
     if (menuToggle && navLinks) {
-
         menuToggle.addEventListener("click", (event) => {
             event.stopPropagation();
 
-            const isOpen =
-                navLinks.classList.toggle("open");
+            const isOpen = navLinks.classList.toggle("open");
 
             menuToggle.setAttribute(
                 "aria-expanded",
@@ -44,29 +33,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
             menuToggle.setAttribute(
                 "aria-label",
-                isOpen
-                    ? "Close navigation"
-                    : "Open navigation"
+                isOpen ? "Close navigation" : "Open navigation"
             );
 
-            menuToggle.textContent =
-                isOpen ? "✕" : "☰";
+            menuToggle.textContent = isOpen ? "✕" : "☰";
         });
 
-        /* Close menu after clicking a navigation link */
-
         navLinks.querySelectorAll("a").forEach((link) => {
-
             link.addEventListener("click", () => {
                 closeMenu();
             });
-
         });
 
-        /* Close menu when clicking outside */
-
         document.addEventListener("click", (event) => {
-
             if (
                 navLinks.classList.contains("open") &&
                 !navLinks.contains(event.target) &&
@@ -74,49 +53,36 @@ document.addEventListener("DOMContentLoaded", () => {
             ) {
                 closeMenu();
             }
-
         });
 
-        /* Close mobile menu when returning to desktop */
-
         window.addEventListener("resize", () => {
-
             if (window.innerWidth > 760) {
                 closeMenu();
             }
-
         });
     }
-
 
     /* -------------------------
        COPYRIGHT YEAR
        ------------------------- */
 
-    const yearElement =
-        document.getElementById("year");
+    const yearElement = document.getElementById("year");
 
     if (yearElement) {
-
-        yearElement.textContent =
-            new Date().getFullYear();
-
+        yearElement.textContent = new Date().getFullYear();
     }
-
 
     /* -------------------------
        HEADER SHADOW ON SCROLL
        ------------------------- */
 
     const updateHeader = () => {
-
         if (!header) return;
 
         header.style.boxShadow =
             window.scrollY > 12
                 ? "0 8px 28px rgba(16,29,58,.08)"
                 : "none";
-
     };
 
     updateHeader();
@@ -127,63 +93,38 @@ document.addEventListener("DOMContentLoaded", () => {
         { passive: true }
     );
 
-
     /* -------------------------
        ACTIVE NAVIGATION
        ------------------------- */
 
     const sections = Array.from(
-        document.querySelectorAll(
-            "main section[id]"
-        )
+        document.querySelectorAll("main section[id]")
     );
 
     const navigationLinks = Array.from(
-        document.querySelectorAll(
-            ".nav-links a[href^='#']"
-        )
+        document.querySelectorAll(".nav-links a[href^='#']")
     );
 
     const updateActiveNavigation = () => {
+        if (!sections.length || !navigationLinks.length) return;
 
-        if (
-            !sections.length ||
-            !navigationLinks.length
-        ) {
-            return;
-        }
-
-        const scrollPosition =
-            window.scrollY + 150;
-
-        let currentSection =
-            sections[0].id;
+        const scrollPosition = window.scrollY + 150;
+        let currentSection = sections[0].id;
 
         sections.forEach((section) => {
-
-            if (
-                scrollPosition >=
-                section.offsetTop
-            ) {
-                currentSection =
-                    section.id;
+            if (scrollPosition >= section.offsetTop) {
+                currentSection = section.id;
             }
-
         });
 
         navigationLinks.forEach((link) => {
-
-            const target =
-                link.getAttribute("href");
+            const target = link.getAttribute("href");
 
             link.classList.toggle(
                 "active",
-                target ===
-                    `#${currentSection}`
+                target === `#${currentSection}`
             );
-
         });
-
     };
 
     updateActiveNavigation();
@@ -194,154 +135,87 @@ document.addEventListener("DOMContentLoaded", () => {
         { passive: true }
     );
 
-
     /* -------------------------
        SMOOTH INTERNAL NAVIGATION
        ------------------------- */
 
-    document
-        .querySelectorAll('a[href^="#"]')
-        .forEach((link) => {
+    document.querySelectorAll('a[href^="#"]').forEach((link) => {
+        link.addEventListener("click", (event) => {
+            const targetId = link.getAttribute("href");
 
-            link.addEventListener(
-                "click",
-                (event) => {
+            if (!targetId || targetId === "#") return;
 
-                    const targetId =
-                        link.getAttribute(
-                            "href"
-                        );
+            const target = document.querySelector(targetId);
 
-                    if (
-                        !targetId ||
-                        targetId === "#"
-                    ) {
-                        return;
-                    }
+            if (!target) return;
 
-                    const target =
-                        document.querySelector(
-                            targetId
-                        );
+            event.preventDefault();
 
-                    if (!target) {
-                        return;
-                    }
+            const headerHeight = header
+                ? header.offsetHeight
+                : 0;
 
-                    event.preventDefault();
+            const targetTop =
+                target.getBoundingClientRect().top +
+                window.scrollY -
+                headerHeight -
+                10;
 
-                    const headerHeight =
-                        header
-                            ? header.offsetHeight
-                            : 0;
+            window.scrollTo({
+                top: targetTop,
+                behavior: "smooth"
+            });
 
-                    const targetTop =
-                        target
-                            .getBoundingClientRect()
-                            .top +
-                        window.scrollY -
-                        headerHeight -
-                        10;
-
-                    window.scrollTo({
-                        top: targetTop,
-                        behavior: "smooth"
-                    });
-
-                    history.replaceState(
-                        null,
-                        "",
-                        targetId
-                    );
-
-                    closeMenu();
-
-                }
+            history.replaceState(
+                null,
+                "",
+                targetId
             );
 
+            closeMenu();
         });
-
+    });
 
     /* -------------------------
        SCROLL REVEAL ANIMATION
        ------------------------- */
 
     const revealTargets = [
-
         ".section-heading",
-
         ".about-card",
-
         ".service-card",
-
         ".process-item",
-
         ".why-card",
-
         ".contact-item"
-
     ];
 
-    const revealElements =
-        document.querySelectorAll(
-            revealTargets.join(",")
-        );
+    const revealElements = document.querySelectorAll(
+        revealTargets.join(",")
+    );
 
+    if ("IntersectionObserver" in window && revealElements.length) {
+        const observer = new IntersectionObserver(
+            (entries, obs) => {
+                entries.forEach((entry) => {
+                    if (!entry.isIntersecting) return;
 
-    if (
-        "IntersectionObserver" in window &&
-        revealElements.length
-    ) {
-
-        const observer =
-            new IntersectionObserver(
-                (entries, obs) => {
-
-                    entries.forEach(
-                        (entry) => {
-
-                            if (
-                                !entry.isIntersecting
-                            ) {
-                                return;
-                            }
-
-                            entry.target.classList.add(
-                                "reveal",
-                                "visible"
-                            );
-
-                            obs.unobserve(
-                                entry.target
-                            );
-
-                        }
+                    entry.target.classList.add(
+                        "reveal",
+                        "visible"
                     );
 
-                },
-                {
-                    threshold: 0.12,
-
-                    rootMargin:
-                        "0px 0px -45px 0px"
-                }
-            );
-
-
-        revealElements.forEach(
-            (element) => {
-
-                element.classList.add(
-                    "reveal"
-                );
-
-                observer.observe(
-                    element
-                );
-
+                    obs.unobserve(entry.target);
+                });
+            },
+            {
+                threshold: 0.12,
+                rootMargin: "0px 0px -45px 0px"
             }
         );
 
+        revealElements.forEach((element) => {
+            element.classList.add("reveal");
+            observer.observe(element);
+        });
     }
-
 });
